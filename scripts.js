@@ -2,10 +2,12 @@ const board = document.getElementById('board');
 const cells = document.querySelectorAll('.cell');
 const status = document.getElementById('status');
 const restartBtn = document.getElementById('restartBtn');
+const winAudio = new Audio('FAHHH_Meme_Sound_Effect.mp3');
 let currentPlayer = 'X';
 let gameActive = true;
 let gameState = ['', '', '', '', '', '', '', '', ''];
 let isRestarting = false;
+let hasPlayedWinAudio = false;
 
 const winningConditions = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
@@ -88,6 +90,15 @@ function showWinMessage(player) {
     }, 2000);
 }
 
+function playWinAudioOnce() {
+    if (hasPlayedWinAudio) return;
+    hasPlayedWinAudio = true;
+    winAudio.currentTime = 0;
+    winAudio.play().catch(() => {
+        // Ignore autoplay/playback errors silently.
+    });
+}
+
 function handleCellClick(e) {
     const cell = e.target;
     const index = parseInt(cell.getAttribute('data-index'));
@@ -111,6 +122,7 @@ function handleCellClick(e) {
         status.style.display = 'none';
         highlightWinningCells();
         createConfetti();
+        playWinAudioOnce();
         showWinMessage(currentPlayer);
         return;
     }
@@ -163,6 +175,9 @@ function restartGame() {
     // Reset game state
     currentPlayer = 'X';
     gameActive = true;
+    hasPlayedWinAudio = false;
+    winAudio.pause();
+    winAudio.currentTime = 0;
     gameState = ['', '', '', '', '', '', '', '', ''];
     status.textContent = `Player ${currentPlayer}'s turn`;
     status.style.display = 'block';
